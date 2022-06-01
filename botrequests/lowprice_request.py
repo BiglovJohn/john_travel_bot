@@ -38,7 +38,7 @@ def get_data_low(message, answer):
     address (str): Адрес отеля
     distance_to_center (str): Расстояние до центра города от данного отеля
     price (str): Цена за ночь
-    total_price (str): Общая стоимость за выбранный период
+    total_price (float): Общая стоимость за выбранный период
     """
 
     user_id = message.from_user.id
@@ -109,8 +109,8 @@ def get_data_low(message, answer):
                 hotel_name=hotel_name,
                 hotel_address=address,
                 distance_to_center=dist_to_center,
-                price_per_night=price,
-                total_price=total_price
+                price_per_night=price.replace(',', '.'),
+                total_price=total_price.replace(',', '.')
             )
 
             media_group = []
@@ -128,18 +128,18 @@ def get_data_low(message, answer):
                 response_pic = requests.request("GET", url2, headers=headers, params=querystring_pic)
                 data_pic = json.loads(response_pic.text)
 
-                pic_url = (data_pic['hotelImages'][j]['baseUrl']).format(size='b')
+                pic_url = (data_pic['hotelImages'][j]['baseUrl']).format(size='z')
                 media_group.append(InputMediaPhoto(pic_url, caption=''))
             bot.send_media_group(chat_id=message.chat.id, media=media_group)
 
             result_low = (
-                'Название отеля: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
+                'Название: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
                 'Цена за ночь: {price} РУБ\nИтого: {total_price} РУБ\nСсылка на отель: {link}'.format(
                     hotel=hotel_name,
                     adress=address,
                     city_center=round((float(dist_to_center) / 0.62), 2),
-                    price=price,
-                    total_price=total_price,
+                    price=price.replace(',', '.'),
+                    total_price=total_price.replace(',', '.'),
                     link='https://www.hotels.com/ho' + str(current_hotel_id)
                 )
             )
@@ -168,18 +168,18 @@ def get_data_low(message, answer):
                 hotel_name=hotel_name,
                 hotel_address=address,
                 distance_to_center=dist_to_center,
-                price_per_night=price,
-                total_price=str(total_price[1])
+                price_per_night=price.replace(',', '.'),
+                total_price=str(total_price[1]).replace(',', '.')
             )
 
             result_low = (
-                'Название отеля: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\nЦена за ночь:'
+                'Название: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\nЦена за ночь:'
                 ' {price} РУБ\nИтого: {total_price} РУБ\nСсылка на отель: {link}'.format(
                     hotel=hotel_name,
                     adress=address,
                     city_center=round((float(dist_to_center) / 0.62), 2),
-                    price=price,
-                    total_price=total_price[1],
+                    price=price.replace(',', '.'),
+                    total_price=total_price[1].replace(',', '.'),
                     link='https://www.hotels.com/ho' + str(hotel_id)
                 )
             )

@@ -80,12 +80,12 @@ def get_data_best(message, answer: str):
     data_low = json.loads(response_low.text)
 
     if answer == 'yes':
-        searching_func_pic(message, user_id, data_low, url2, h_count, h_iter)
+        searching_func_pic(message, user_id, data_low, url2, h_iter)
     else:
-        searching_func(message, user_id, data_low, h_count, h_iter)
+        searching_func(message, user_id, data_low, h_iter)
 
 
-def searching_func_pic(message, user_id, data, pic_url, func_count: int, func_iter: int):
+def searching_func_pic(message, user_id, data, pic_url, func_iter: int):
     """
     Функция сбора данных из API по заданным параметрам
 
@@ -111,9 +111,8 @@ def searching_func_pic(message, user_id, data, pic_url, func_count: int, func_it
     min_distance = result[5] * 0.62
     max_distance = result[6] * 0.62
     request_time = result[13]
-    offers = len(data['data']['body']['searchResults']['results'])
 
-    while func_iter != offers - 1:
+    while func_iter != hotels_count:
         distance = float(data['data']['body']['searchResults']['results'][func_iter]['landmarks'][0]
                          ['distance'].split(' ')[0])
 
@@ -139,8 +138,8 @@ def searching_func_pic(message, user_id, data, pic_url, func_count: int, func_it
                 hotel_name=hotel_name,
                 hotel_address=address,
                 distance_to_center=dist_to_center,
-                price_per_night=price,
-                total_price=total_price[1]
+                price_per_night=price.replace(',', '.'),
+                total_price=total_price[1].replace(',', '.')
             )
             media_group = []
             for i in range(pic_count):
@@ -156,32 +155,29 @@ def searching_func_pic(message, user_id, data, pic_url, func_count: int, func_it
                 response_pic = requests.request("GET", pic_url, headers=headers, params=querystring_pic)
                 data_pic = json.loads(response_pic.text)
 
-                picture_url = (data_pic['hotelImages'][i]['baseUrl']).format(size='b')
+                picture_url = (data_pic['hotelImages'][i]['baseUrl']).format(size='z')
                 media_group.append(InputMediaPhoto(picture_url, caption=''))
 
             bot.send_media_group(chat_id=message.chat.id, media=media_group)
 
             result_low = (
-                'Название отеля: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
+                'Название: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
                 'Цена за ночь: {price} РУБ\nИтого: {total_price} РУБ\nСсылка на отель: {link}'.format(
                     hotel=hotel_name,
                     adress=address,
                     city_center=round((float(dist_to_center) / 0.62), 2),
-                    price=price,
-                    total_price=total_price[1],
+                    price=price.replace(',', '.'),
+                    total_price=total_price[1].replace(',', '.'),
                     link='https://www.hotels.com/ho' + str(current_hotel_id)
                 )
             )
-            func_count += 1
+            func_iter += 1
             bot.send_message(message.chat.id, result_low, disable_web_page_preview=True)
         else:
-            func_iter += 1
-            searching_func_pic(message, user_id, data, pic_url, func_count, func_iter)
-        func_iter += 1
-        searching_func_pic(message, user_id, data, pic_url, func_count, func_iter)
+            searching_func_pic(message, user_id, data, pic_url, func_iter)
 
 
-def searching_func(message, user_id, data, func_count: int, func_iter: int):
+def searching_func(message, user_id, data, func_iter: int):
     """
     Функция сбора данных из API по заданным параметрам
 
@@ -206,9 +202,8 @@ def searching_func(message, user_id, data, func_count: int, func_iter: int):
     min_distance = result[5] * 0.62
     max_distance = result[6] * 0.62
     request_time = result[13]
-    offers = len(data['data']['body']['searchResults']['results'])
 
-    while func_iter != offers - 1:
+    while func_iter != hotels_count:
         distance = float(data['data']['body']['searchResults']['results'][func_iter]['landmarks'][0]
                          ['distance'].split(' ')[0])
 
@@ -237,28 +232,22 @@ def searching_func(message, user_id, data, func_count: int, func_iter: int):
                 hotel_name=h_name,
                 hotel_address=h_address,
                 distance_to_center=dist_to_center,
-                price_per_night=price,
-                total_price=str(total_price[1])
+                price_per_night=price.replace(',', '.'),
+                total_price=str(total_price[1].replace(',', '.'))
             )
 
             result_low = (
-                'Название отеля: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
+                'Название: {hotel}\nАдрес: {adress}\nРасстояние до центра: {city_center} км.\n'
                 'Цена за ночь: {price} РУБ\nИтого: {total_price} РУБ\nСсылка на отель: {link}'.format(
                     hotel=hotel_name,
                     adress=address,
                     city_center=round((float(dist_to_center) / 0.62), 2),
-                    price=price,
-                    total_price=total_price[1],
+                    price=price.replace(',', '.'),
+                    total_price=total_price[1].replace(',', '.'),
                     link='https://www.hotels.com/ho' + str(hotel_id)
                 )
             )
-
-            func_count += 1
+            func_iter += 1
             bot.send_message(message.message.chat.id, result_low, disable_web_page_preview=True)
         else:
-            func_iter += 1
-            searching_func(message, user_id, data, func_count, func_iter)
-        func_iter += 1
-        searching_func(message, user_id, data, func_count, func_iter)
-    else:
-        pass
+            searching_func(message, user_id, data, func_iter)
