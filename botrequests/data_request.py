@@ -70,7 +70,7 @@ def process_city_step(message):
 
     logging.info(f'Пользователь: {user_name} - id: {user_id} - воспользовался командой: {command}')
 
-    msg = bot.send_message(message.chat.id, 'Введите название города')
+    msg = bot.send_message(message.chat.id, 'Введите название города (не работает по городам России)')
 
     if message.text == '/bestdeal':
         bot.register_next_step_handler(msg, price_min)

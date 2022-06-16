@@ -112,11 +112,13 @@ def hotels_results(
         hotel_address: str,
         distance_to_center: str,
         price_per_night: str,
-        total_price: str
+        total_price: str,
+        command: str,
 ):
     """
     Функция записывает данные для последующего вывода при запросе полельзователем комманды /history
 
+    :param command: Команда, которую отправил пользователь
     :param user_id: id пользователя
     :param req_time: Время запроса
     :param hotel_name: Название отеля
@@ -134,8 +136,9 @@ def hotels_results(
                    'hotel_address,'
                    'distance_to_center, '
                    'price_per_night,'
-                   'total_price)'
-                   'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   'total_price,'
+                   'command)'
+                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                    (
                        user_id,
                        req_time,
@@ -143,7 +146,8 @@ def hotels_results(
                        hotel_address,
                        distance_to_center,
                        price_per_night,
-                       total_price
+                       total_price,
+                       command
                    )
                    )
     conn.commit()

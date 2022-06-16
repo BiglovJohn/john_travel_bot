@@ -1,3 +1,6 @@
+import json
+
+import requests
 import telebot
 import os
 from dotenv import load_dotenv
@@ -17,3 +20,7 @@ headers = {
         'x-rapidapi-host': "hotels4.p.rapidapi.com",
         'x-rapidapi-key': os.getenv('API_TOKEN_2') # API_TOKEN_2, API_TOKEN_1
 }
+
+url = "https://hotels4.p.rapidapi.com/properties/list"
+url2 = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
+url3 = "https://hotels4.p.rapidapi.com/locations/search"

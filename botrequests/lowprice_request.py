@@ -1,9 +1,10 @@
+import datetime
+
 import requests
 import json
 
 from telebot.types import InputMediaPhoto
-
-from config import bot, headers
+from config import bot, headers, url, url2, url3
 from db import hotels_results, cursor
 
 
@@ -51,25 +52,23 @@ def get_data_low(message, answer):
     pic_count = result[11]
     check_in = result[9]
     check_out = result[10]
+    command = result[12]
     request_time = result[13]
 
-    url = "https://hotels4.p.rapidapi.com/properties/list"
-    url2 = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
-    url3 = "https://hotels4.p.rapidapi.com/locations/search"
+    date_obj_1 = datetime.datetime.strptime(check_in, '%Y-%m-%d')
+    date_obj_2 = datetime.datetime.strptime(check_out, '%Y-%m-%d')
+    delta = (date_obj_2 - date_obj_1).days
 
     querystring_city = {"query": city, "locale": "ru_RU"}
+    response_city = requests.request("GET", url3, headers=headers, params=querystring_city)
+    data_city = json.loads(response_city.text)
 
     try:
-        response_city = requests.request("GET", url3, headers=headers, params=querystring_city)
-        data_city = json.loads(response_city.text)
         city_id = data_city['suggestions'][0]['entities'][0]['destinationId']
     except Exception as ex:
         print(ex)
         city_id = '1634829'
-        if answer == 'yes':
-            bot.send_message(message.chat.id, 'Я не нашёл нужный город, поэтому выдам тебе результат по Праге')
-        else:
-            bot.send_message(message.message.chat.id, 'Я не нашёл нужный город, поэтому выдам тебе результат по Праге')
+        bot.send_message(message.message.chat.id, 'Я не нашёл нужный город, поэтому выдам тебе результат по Праге')
 
     querystring_low = {
         "destinationId": city_id,
@@ -85,21 +84,22 @@ def get_data_low(message, answer):
 
     response_low = requests.request("GET", url, headers=headers, params=querystring_low)
     data_low = json.loads(response_low.text)
+    data = data_low['data']['body']['searchResults']['results']
 
     if answer == 'yes':
         for i in range(hotels_count):
-            current_hotel_id = data_low['data']['body']['searchResults']['results'][i]['id']
-            hotel_name = (data_low['data']['body']['searchResults']['results'][i]['name'])
+            hotel_id = data[i]['id']
+            hotel_name = data[i]['name']
             try:
-                address = data_low['data']['body']['searchResults']['results'][i]['address']['streetAddress']
+                address = data[i]['address']['streetAddress']
             except KeyError:
-                address = data_low['data']['body']['searchResults']['results'][i]['address']['region']
-            dist_to_center = (data_low['data']['body']['searchResults']['results'][i]['landmarks'][0]
-            ['distance']).split(' ')[0]
-            price = (data_low['data']['body']['searchResults']['results'][i]['ratePlan']['price']
-            ["current"]).split(' ')[0]
-            total_price = (data_low['data']['body']['searchResults']['results'][i]['ratePlan']['price']
-            ['fullyBundledPricePerStay']).split(' ')[1]
+                address = data[i]['address']['region']
+            dist_to_center = (data[i]['landmarks'][0]['distance']).split(' ')[0]
+            price = (data[i]['ratePlan']['price']["current"]).split(' ')[0]
+            try:
+                total_price = (data[i]['ratePlan']['price']['fullyBundledPricePerStay']).split(' ')[1]
+            except KeyError:
+                total_price = price * delta
 
             """ Переменные для передачи значений в БД """
 
@@ -110,10 +110,15 @@ def get_data_low(message, answer):
                 hotel_address=address,
                 distance_to_center=dist_to_center,
                 price_per_night=price.replace(',', '.'),
-                total_price=total_price.replace(',', '.')
+                total_price=total_price.replace(',', '.'),
+                command=command
             )
 
             media_group = []
+            querystring_pic = {"id": hotel_id}
+            response_pic = requests.request("GET", url2, headers=headers, params=querystring_pic)
+            data_pic = json.loads(response_pic.text)
+
             for j in range(pic_count):
                 """
                 Получение фотографий отелей
@@ -123,10 +128,6 @@ def get_data_low(message, answer):
                 data_pic (json): Десериализация полученных данных в response_pic в формате JSON
                 pic_url (str): Ссылка на картинку
                 """
-
-                querystring_pic = {"id": current_hotel_id}
-                response_pic = requests.request("GET", url2, headers=headers, params=querystring_pic)
-                data_pic = json.loads(response_pic.text)
 
                 pic_url = (data_pic['hotelImages'][j]['baseUrl']).format(size='z')
                 media_group.append(InputMediaPhoto(pic_url, caption=''))
@@ -140,25 +141,25 @@ def get_data_low(message, answer):
                     city_center=round((float(dist_to_center) / 0.62), 2),
                     price=price.replace(',', '.'),
                     total_price=total_price.replace(',', '.'),
-                    link='https://www.hotels.com/ho' + str(current_hotel_id)
+                    link='https://www.hotels.com/ho' + str(hotel_id)
                 )
             )
 
             bot.send_message(message.chat.id, result_low, disable_web_page_preview=True)
     else:
         for i in range(hotels_count):
-            hotel_name = (data_low['data']['body']['searchResults']['results'][i]['name'])
-            hotel_id = data_low['data']['body']['searchResults']['results'][i]['id']
+            hotel_name = data[i]['name']
+            hotel_id = data[i]['id']
             try:
-                address = data_low['data']['body']['searchResults']['results'][i]['address']['streetAddress']
+                address = data[i]['address']['streetAddress']
             except KeyError:
-                address = data_low['data']['body']['searchResults']['results'][i]['address']['region']
-            dist_to_center = (data_low['data']['body']['searchResults']['results'][i]['landmarks'][0]
-            ['distance']).split(' ')[0]
-            price = (data_low['data']['body']['searchResults']['results'][i]['ratePlan']['price']
-            ["current"]).split(' ')[0]
-            total_price = (data_low['data']['body']['searchResults']['results'][i]['ratePlan']['price']
-            ['fullyBundledPricePerStay']).split(' ')
+                address = data[i]['address']['region']
+            dist_to_center = (data[i]['landmarks'][0]['distance']).split(' ')[0]
+            price = (data[i]['ratePlan']['price']["current"]).split(' ')[0]
+            try:
+                total_price = (data[i]['ratePlan']['price']['fullyBundledPricePerStay']).split(' ')
+            except KeyError:
+                total_price = price * delta
 
             """  Переменные для передачи значений в БД """
 
@@ -169,7 +170,8 @@ def get_data_low(message, answer):
                 hotel_address=address,
                 distance_to_center=dist_to_center,
                 price_per_night=price.replace(',', '.'),
-                total_price=str(total_price[1]).replace(',', '.')
+                total_price=str(total_price[1]).replace(',', '.'),
+                command=command
             )
 
             result_low = (
