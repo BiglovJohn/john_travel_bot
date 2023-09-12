@@ -1,13 +1,16 @@
 import sqlite3
+
+from telebot.types import Message
+
 from config import bot
 
 
-def process_history_request(message):
+def process_history_request(message: Message) -> None:
 
     """
     Функция для получения и отправки пользователю истории запросов по команде 'history'
 
-    :return: history_result
+    :return: None
 
     USER_ID (int): id пользователя
     """

@@ -1,5 +1,7 @@
 import logging
 
+import telebot
+
 from config import bot
 from telebot import types
 from telegram_bot_calendar import DetailedTelegramCalendar
@@ -19,11 +21,11 @@ logging.basicConfig(filename='travel_bot_logs.log',
                     )
 
 
-def restart_function(message):
+def restart_function(message: telebot.types.Message) -> None:
     bot.send_message(message.from_user.id, 'Что-то пошло не так? Попробуй ещё раз! Введите команду заново.')
 
 
-def process_city_step(message):
+def process_city_step(message: telebot.types.Message) -> None:
     """
     Функция для запроса города в котором необходимо найти отели
 
@@ -78,7 +80,7 @@ def process_city_step(message):
         bot.register_next_step_handler(msg, process_hotels_step)
 
 
-def price_min(message):
+def price_min(message: telebot.types.Message) -> None:
     """
     Функция для запроса минимальной цены за номер при запросе 'bestdeal'
 
@@ -113,7 +115,7 @@ def price_min(message):
             bot.register_next_step_handler(msg, price_min)
 
 
-def price_max(message):
+def price_max(message: telebot.types.Message) -> None:
     """
     Функция для запроса максимальной цены за номер при запросе 'bestdeal'
 
@@ -149,7 +151,7 @@ def price_max(message):
             bot.register_next_step_handler(msg, price_max)
 
 
-def distance_min(message):
+def distance_min(message: telebot.types.Message) -> None:
     """
     Функция для запроса минимального расстояния до центра города
 
@@ -190,7 +192,7 @@ def distance_min(message):
             bot.register_next_step_handler(msg, distance_min)
 
 
-def distance_max(message):
+def distance_max(message: telebot.types.Message) -> None:
     """
     Функция для запроса максимального расстояния до центра города
 
@@ -233,7 +235,7 @@ def distance_max(message):
             bot.register_next_step_handler(msg, distance_max)
 
 
-def process_hotels_step(message):
+def process_hotels_step(message: telebot.types.Message) -> None:
     """
     Если запрос был не 'beatdeal', то в result сохраняется название города и вызывается следующая функция.
     Если запрос был 'beatdeal', то в best_deal_list сохраняется максимальное расстояние до центра города в данном
@@ -312,7 +314,7 @@ def process_hotels_step(message):
                 bot.register_next_step_handler(msg, process_hotels_step)
 
 
-def check_in(message):
+def check_in(message: telebot.types.Message) -> None:
     """
     У пользователя запрашивается дата заселения и сохраняется в result количество отелей которое он запросил.
     Проверка: пользователь ввёл цифру, иначе функция вызывается заново.
@@ -365,7 +367,7 @@ def check_in(message):
 
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=0))
-def calendar1(call):
+def calendar1(call: telebot.types.CallbackQuery) -> None:
     """
     Хэндлер для функций 'check_in'
 
@@ -401,7 +403,7 @@ def calendar1(call):
     conn.commit()
 
 
-def check_out(message):
+def check_out(message: telebot.types.Message) -> None:
     """
     У пользователя запрашивается дата отъезда
 
@@ -420,7 +422,7 @@ def check_out(message):
 
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=1))
-def calendar2(call):
+def calendar2(call: telebot.types.CallbackQuery) -> None:
     """
     Хэндлер для функций 'check_out'
 
@@ -477,7 +479,7 @@ def calendar2(call):
             check_out(call.message)
 
 
-def process_photos_step(message):
+def process_photos_step(message: telebot.types.Message) -> None:
     """
     Запрос у пользователя на поиск фотографий к отелям
 
@@ -501,7 +503,7 @@ def process_photos_step(message):
 
 
 @bot.callback_query_handler(func=lambda call: True)
-def query_handler(call):
+def query_handler(call: telebot.types.CallbackQuery) -> None:
     """
     Запись ответа пользователя в result из предыдущего шага.
     Запрос количества фотографий, если на предыдущем шаге выбрали 'да' и вызов соответствующей функции.
@@ -556,7 +558,7 @@ def query_handler(call):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
 
-def photos_count_step(message):
+def photos_count_step(message: telebot.types.Message) -> None:
     """
     Сохранение количества запрашиваемых фотографий в данном запросе в result
     Проверка: в зависимости от введённой пользователем команды вызывается необходимая функция.

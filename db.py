@@ -51,7 +51,7 @@ def db_table_val(
         photos_count: int,
         command: str,
         request_time: datetime
-):
+) -> None:
     """
     Функция записывает параметры в БД, которые бот получает от пользователя
 
@@ -114,7 +114,7 @@ def hotels_results(
         price_per_night: str,
         total_price: str,
         command: str,
-):
+) -> None:
     """
     Функция записывает данные для последующего вывода при запросе полельзователем комманды /history
 

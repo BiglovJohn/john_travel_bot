@@ -3,12 +3,12 @@ import datetime
 import requests
 import json
 
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, Message
 from config import bot, headers, url, url2, url3
 from db import hotels_results, cursor
 
 
-def get_data_high(message, answer: str):
+def get_data_high(message: Message, answer: str) -> None:
     """
     Функция для получения ответа от API на запрос 'highprice' с фотографиями
 

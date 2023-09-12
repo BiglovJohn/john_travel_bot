@@ -3,18 +3,18 @@ import datetime
 import requests
 import json
 
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, Message
 from config import bot, headers, url, url2, url3
 from db import hotels_results, cursor
 
 
-def get_data_best(message, answer: str):
+def get_data_best(message: Message, answer: str) -> None:
     """
     Функция для получения ответа от API на запрос 'bestdeal' с фотографиями
 
     :param message: Передаётся класс Message библиотеки TelegramBotAPI
     :param answer: Ответ пользователя показывать фотографии отеля или нет
-    :return: result_low
+    :return: None
 
     city (str): Переменной присваивается название города по которому будет происходить поиск отелей
     hotels_count (int): Переменной присваивается значение количества городов из ответов пользователя
@@ -83,13 +83,13 @@ def get_data_best(message, answer: str):
         searching_func(message, user_id, data, h_iter)
 
 
-def searching_func_pic(message, user_id, data, pic_url, func_iter: int):
+def searching_func_pic(message: Message, user_id: int, data, pic_url: str, func_iter: int) -> None:
     """
     Функция сбора данных из API по заданным параметрам
 
     func_count (int): Передаётся значение параметра h_count
     func_iter (int): Передаётся значение параметра h_iter
-    :return: result_low
+    :return: None
 
     distance (float): Значение расстояния до центра города для каждого из отелей
     current_hotel_id (str): id текущего проверяемого отеля
@@ -183,7 +183,7 @@ def searching_func_pic(message, user_id, data, pic_url, func_iter: int):
             searching_func_pic(message, user_id, data, pic_url, func_iter)
 
 
-def searching_func(message, user_id, data, func_iter: int):
+def searching_func(message: Message, user_id: int, data, func_iter: int):
     """
     Функция сбора данных из API по заданным параметрам
 

@@ -1,6 +1,3 @@
-import json
-
-import requests
 import telebot
 import os
 from dotenv import load_dotenv
@@ -18,7 +15,7 @@ bot = telebot.TeleBot(os.getenv('KEY'))
 
 headers = {
         'x-rapidapi-host': "hotels4.p.rapidapi.com",
-        'x-rapidapi-key': os.getenv('API_TOKEN_2') # API_TOKEN_2, API_TOKEN_1
+        'x-rapidapi-key': os.getenv('API_TOKEN_1') # API_TOKEN_2, API_TOKEN_1
 }
 
 url = "https://hotels4.p.rapidapi.com/properties/list"

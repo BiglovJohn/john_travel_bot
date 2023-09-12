@@ -1,8 +1,10 @@
+from telebot.types import Message
+
 from config import bot
 
 
 @bot.message_handler(commands=['start'])
-def start_message(message):
+def start_message(message: Message) -> None:
     sti = open('welcome.tgs', 'rb')
     bot.send_sticker(message.chat.id, sti)
     bot.send_message(message.chat.id,
@@ -12,7 +14,7 @@ def start_message(message):
 
 
 @bot.message_handler(commands=['help'])
-def help_message(message):
+def help_message(message: Message) -> None:
     bot.send_message(message.chat.id,
                      'Я могу найти подходящий Вам отель в любом городе мира, за исключением городов России, Украины и '
                      'республики Беларусь.\nДля того чтобы начать выберите нужную команду (Вы можете их найти слева'

@@ -3,12 +3,12 @@ import datetime
 import requests
 import json
 
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, Message
 from config import bot, headers, url, url2, url3
 from db import hotels_results, cursor
 
 
-def get_data_low(message, answer):
+def get_data_low(message: Message, answer: str):
     """
     Функция для получения ответа от API на запрос 'lowprice' с фотографиями
 
